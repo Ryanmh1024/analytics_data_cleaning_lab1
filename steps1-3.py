@@ -103,6 +103,24 @@ collegedf.basic.value_counts()
 # Maybe categorize into specific programs based on Associates, Theological, Masters?
 
 #%%
+associate = ['associate']
+master = ["masters"]
+theological = ["theological"]
+bacclaureate = ["bacclaureate","bachelor"]
+art = ["art"]
+other = ["Associates","Masters","Theological","Bachelors","Art"]
+
+#%%
+# Lambda function explanation:
+# lambda x: "Type_of_School" if x in school_variable else x
+# If the school falls into that category, then it will be renamed to said school type
+# This is done by checking if it is in the list for that school type
+# If it is not, then it will simply return x, or its original unaltered nanme
+collegedf.basic = collegedf.basic.apply(lambda x: "Associates" if x.lower() in associate else x)
+
+#%%
+collegedf.basic.value_counts()
+#%%
 collegedf.site.value_counts()
 # These are websites and don't need to be categorized.
 #%%
