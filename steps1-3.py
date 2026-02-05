@@ -158,8 +158,8 @@ print(collegedf_clean.awards_per_state_value.describe())
 #%%
 # Creating a new column that groups the target variable into two bins, above or below the 75th percentile at 0.37
 collegedf_clean['awards_per_state_value_f'] = pd.cut(collegedf_clean.awards_per_state_value,
-                                    bins=[-1, 0.37037, 1],
-                                    labels=[0, 1])
+                                                     bins=[-1, 0.37037, 1],
+                                                     labels=[0, 1])
 #%%
 collegedf_clean
 #%%
