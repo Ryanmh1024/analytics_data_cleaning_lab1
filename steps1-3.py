@@ -175,6 +175,8 @@ print(f"Prevalence: {prevalence:.2%}")
 print(collegedf_clean.awards_per_state_value_f.value_counts())
 print(f"Manual calculation: 1020/(1020+2778) = {1020/(1020+2778):.4f}")
 #%%
+collegedf_clean = collegedf_clean.dropna(subset=['awards_per_state_value_f'])
+#%%
 # Splitting data for target variable into train and test first
 train, test = train_test_split(
     collegedf_clean,
