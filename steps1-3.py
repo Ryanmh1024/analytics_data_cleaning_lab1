@@ -2,6 +2,8 @@
 # Importing required packages
 import pandas as pd
 import numpy as np
+from sklearn.model_selection import train_test_split  # For splitting data
+from sklearn.preprocessing import MinMaxScaler, StandardScaler  # For scaling
 
 # %%
 collegedf = pd.read_csv("https://raw.githubusercontent.com/UVADS/DS-3021/refs/heads/main/data/cc_institution_details.csv")
@@ -136,6 +138,36 @@ collegedf.basic.value_counts()
 #%%
 collegedf.site.value_counts()
 # These are websites and don't need to be categorized.
+
+"""
+One-hot encoding factor variables to be put through machine learning
+"""
+#%%
+# Getting all categorical columns and putting them into a list
+categories = list(collegedf.select_dtypes('category'))
+# Get dummies encodes the categorical variables by adding a new column 
+# for each group of a category and assigning it to 0 or 1 for false or true
+collegedf_1h = pd.get_dummies(collegedf, columns = categories)
+collegedf_1h
+
+#%%
+"""
+Standardize and Normalize the continuous data
+"""
+collegedf
+#%%
+# Gathering all float columns because those are continuous data columns that need to be standardized first
+continuous = list(collegedf.select_dtypes('float64'))
+# Standardized data by taking mean and standard deviation and calculating z-scores
+collegedf_standardized = StandardScaler().fit_transform(collegedf[continuous])
+# Array of z-scores for each column
+collegedf_standardized[0:10]
+
+#%%
+# Bounds all values between 0 and 1 by Min-Max normalization
+# Formula = (x-min)/(max-min)
+collegedf_normalized = MinMaxScaler().fit_transform(collegedf_standardized[continuous])
+collegedf_normalized[0:10]
 #%%
 # Prevalence is calculating the percentage of targets that pass (0 or 1) (ballpark 10-20%)
 # Usually care about modeling something that occurs a small percentage of the time.
