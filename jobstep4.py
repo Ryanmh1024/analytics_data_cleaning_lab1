@@ -55,6 +55,7 @@ def prevalence(df,binary_target:str):
 # first_split: integer of how many values to put into training (usually # of 0's)
 # second_split: float for proportion of values to go into test and tune (usually .5)
 def split_data(df,binary_target:str,first_split:int,second_split:float):
+    df = df.dropna(subset=[binary_target])
     train,test = train_test_split(
         df,
         train_size=first_split,
