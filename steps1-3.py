@@ -2,6 +2,7 @@
 # Importing required packages
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split  # For splitting data
 from sklearn.preprocessing import MinMaxScaler, StandardScaler  # For scaling
 
@@ -38,7 +39,7 @@ collegedf["flagship"] = collegedf["flagship"].apply(lambda x: 1 if x == 'X' else
 Correct variable type/class as needed - making categorical variables. 
 """
 # Putting the column names that need to be categorical into a variable
-Column_index_list = ["chronname","city","state","level","control","basic","site"]
+Column_index_list = ["state","level","control","basic"]
 # Converting columns necessary to categorical for computation later.
 collegedf[Column_index_list]= collegedf[Column_index_list].astype('category')
 
@@ -50,12 +51,6 @@ collegedf.dtypes
 """
 Fix factor levels: Check that categorical variables don't have too many groups.
 """
-collegedf.chronname.value_counts()[0:10]
-# Not worth altering because there are far too many schools to categorize.
-#%%
-collegedf.city.value_counts()[20:40]
-# Too many cities with high numbers to categorize.
-
 #%%
 collegedf.state.value_counts()
 # Going to categorize into Midwest, Northeast, Pacific, Southeast, and West.
@@ -105,16 +100,6 @@ collegedf.basic.value_counts()
 # Categorize into specific programs based on Associates, Theological, Masters, etc.
 
 #%%
-collegedf.basic.dtype
-#%%
-associate = ['associate']
-master = ["masters"]
-theological = ["theological"]
-bacclaureate = ["bacclaureate","bachelor"]
-art = ["art"]
-other = ["Associates","Masters","Theological","Bachelors","Art"]
-
-#%%
 # Lambda function explanation:
 # lambda x: "Type_of_School" if x in school_variable else x
 # If the school falls into that category, then it will be renamed to said school type
@@ -127,7 +112,7 @@ collegedf.basic = collegedf.basic.apply(lambda x: "Baccalaureate" if 'baccalaure
 collegedf.basic = collegedf.basic.apply(lambda x: "Art" if 'art' in x.lower() else x)
 collegedf.basic = collegedf.basic.apply(lambda x: "Research" if 'research' in x.lower() else x)
 #%%
-# Special inelegant function set to group all other ungrouped colleges into Other
+# Inelegant function set to group all other ungrouped colleges into Other
 collegedf.basic = collegedf.basic.apply(lambda x: "Other" if 'other' in x.lower() else x)
 collegedf.basic = collegedf.basic.apply(lambda x: "Other" if 'schools of' in x.lower() else x)
 collegedf.basic = collegedf.basic.apply(lambda x: "Other" if 'tribal' in x.lower() else x)
@@ -136,9 +121,6 @@ collegedf.basic = collegedf.basic.apply(lambda x: "Other" if 'not applicable' in
 #%%
 collegedf.basic.value_counts()
 #%%
-collegedf.site.value_counts()
-# These are websites and don't need to be categorized.
-
 """
 One-hot encoding factor variables to be put through machine learning
 """
@@ -154,7 +136,6 @@ collegedf_1h
 """
 Standardize and Normalize the continuous data
 """
-collegedf
 #%%
 # Gathering all float columns because those are continuous data columns that need to be standardized first
 continuous = list(collegedf.select_dtypes('float64'))
@@ -166,8 +147,29 @@ collegedf_standardized[0:10]
 #%%
 # Bounds all values between 0 and 1 by Min-Max normalization
 # Formula = (x-min)/(max-min)
-collegedf_normalized = MinMaxScaler().fit_transform(collegedf_standardized[continuous])
+collegedf_normalized = MinMaxScaler().fit_transform(collegedf[continuous])
 collegedf_normalized[0:10]
+
+#%%
+# Need to verify that scaling did not change the density function of original dataframe
+collegedf.awards_per_value.plot.density()
+#%%
+# Make sure to check the right column, indicing with 2 displays the awards_per_value column
+pd.DataFrame(collegedf_normalized)[2].plot.density()
+# Success! Both densities are the same!
+#%%
+"""
+Dropping variables that are not necessary for computation.
+"""
+#%%
+collegedf_clean = collegedf_1h.drop(['index','unitid','chronname','site','long_x','lat_y','vsa_year','vsa_enroll_elsewhere_after4_first',
+                                     'vsa_grad_after4_first','vsa_grad_elsewhere_after4_first','vsa_enroll_after4_first','city','vsa_enroll_after6_first',
+                                     'vsa_grad_after6_first','vsa_grad_elsewhere_after6_first','vsa_enroll_elsewhere_after6_first','med_sat_value',
+                                     'vsa_grad_after4_transfer','vsa_grad_elsewhere_after4_transfer','vsa_enroll_after4_transfer','med_sat_percentile',
+                                     'vsa_enroll_elsewhere_after4_transfer','vsa_grad_after6_transfer','vsa_grad_elsewhere_after6_transfer',
+                                     'vsa_enroll_after6_transfer','vsa_enroll_elsewhere_after6_transfer','similar','counted_pct','nicknames'], axis=1)
+#%%
+collegedf_clean
 #%%
 # Prevalence is calculating the percentage of targets that pass (0 or 1) (ballpark 10-20%)
 # Usually care about modeling something that occurs a small percentage of the time.
