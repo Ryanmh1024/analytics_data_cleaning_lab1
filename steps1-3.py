@@ -126,13 +126,6 @@ continuous = list(collegedf.select_dtypes('number'))
 collegedf[continuous] = MinMaxScaler().fit_transform(collegedf[continuous])
 
 #%%
-# Need to verify that scaling did not change the density function of original dataframe
-collegedf.awards_per_state_value.plot.density()
-#%%
-# Make sure to check the right column, indicing with 2 displays the awards_per_value column
-pd.DataFrame(collegedf_normalized)[8].plot.density()
-# Success! Both densities are the same!
-#%%
 """
 One-hot encoding factor variables to be put through machine learning
 """
@@ -215,3 +208,4 @@ My instincts are telling me that this data will not actually help me learn more 
 that go into SAT scores because there are no clear variables that can indicate higher SAT scores and
 there are too few SAT scores in this dataset to draw any conclusions from.
 """
+# %%
