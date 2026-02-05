@@ -13,13 +13,6 @@ collegedf.head()
 Generic Question: What metrics lead to higher SAT values?
 """
 
-# %%
-jobdf = pd.read_csv("https://raw.githubusercontent.com/DG1606/CMS-R-2020/master/Placement_Data_Full_Class.csv")
-jobdf.head()
-""" 
-Question: Do higher MBA Percentages correlate to Job Placement?
-"""
-
 #%%
 """Step Two - College Dataset
 Independent Business Metric: Assuming we can find what metrics indicate higher SAT,
