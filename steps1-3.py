@@ -122,6 +122,25 @@ collegedf.basic = collegedf.basic.apply(lambda x: "Other" if 'not applicable' in
 collegedf.basic.value_counts()
 #%%
 """
+Standardize and Normalize the continuous data
+"""
+#%%
+# Gathering all numeric columns
+continuous = list(collegedf.select_dtypes('number'))
+#%%
+# Bounds all values between 0 and 1 by Min-Max normalization
+# Formula = (x-min)/(max-min)
+collegedf[continuous] = MinMaxScaler().fit_transform(collegedf[continuous])
+
+#%%
+# Need to verify that scaling did not change the density function of original dataframe
+collegedf.awards_per_state_value.plot.density()
+#%%
+# Make sure to check the right column, indicing with 2 displays the awards_per_value column
+pd.DataFrame(collegedf_normalized)[8].plot.density()
+# Success! Both densities are the same!
+#%%
+"""
 One-hot encoding factor variables to be put through machine learning
 """
 #%%
@@ -134,31 +153,6 @@ collegedf_1h
 
 #%%
 """
-Standardize and Normalize the continuous data
-"""
-#%%
-# Gathering all float columns because those are continuous data columns that need to be standardized first
-continuous = list(collegedf.select_dtypes('float64'))
-# Standardized data by taking mean and standard deviation and calculating z-scores
-collegedf_standardized = StandardScaler().fit_transform(collegedf[continuous])
-# Array of z-scores for each column
-collegedf_standardized[0:10]
-
-#%%
-# Bounds all values between 0 and 1 by Min-Max normalization
-# Formula = (x-min)/(max-min)
-collegedf_normalized = MinMaxScaler().fit_transform(collegedf[continuous])
-collegedf_normalized[0:10]
-
-#%%
-# Need to verify that scaling did not change the density function of original dataframe
-collegedf.awards_per_value.plot.density()
-#%%
-# Make sure to check the right column, indicing with 2 displays the awards_per_value column
-pd.DataFrame(collegedf_normalized)[2].plot.density()
-# Success! Both densities are the same!
-#%%
-"""
 Dropping variables that are not necessary for computation.
 """
 #%%
@@ -168,8 +162,63 @@ collegedf_clean = collegedf_1h.drop(['index','unitid','chronname','site','long_x
                                      'vsa_grad_after4_transfer','vsa_grad_elsewhere_after4_transfer','vsa_enroll_after4_transfer','med_sat_percentile',
                                      'vsa_enroll_elsewhere_after4_transfer','vsa_grad_after6_transfer','vsa_grad_elsewhere_after6_transfer',
                                      'vsa_enroll_after6_transfer','vsa_enroll_elsewhere_after6_transfer','similar','counted_pct','nicknames'], axis=1)
+collegedf_clean
+#%%
+# Choosing awards_per_state_value to be target variable because indicative of the number of awards in comparision to the state.
+print(collegedf_clean.boxplot(column='awards_per_state_value', vert=False, grid=False))
+#%%
+# Checking statistical values for this target variable
+print(collegedf_clean.awards_per_state_value.describe())
+#%%
+# Creating a new column that groups the target variable into two bins, above or below the 75th percentile at 0.37
+collegedf_clean['awards_per_state_value_f'] = pd.cut(collegedf_clean.awards_per_state_value,
+                                    bins=[-1, 0.37037, 1],
+                                    labels=[0, 1])
 #%%
 collegedf_clean
 #%%
-# Prevalence is calculating the percentage of targets that pass (0 or 1) (ballpark 10-20%)
-# Usually care about modeling something that occurs a small percentage of the time.
+# Using prevalence formula, where the top is the 1's (indexed by 1 bc those values are second)
+# divided by the total number of values in the target variable.
+prevalence = (collegedf_clean.awards_per_state_value_f.value_counts()[1] /
+              len(collegedf_clean.awards_per_state_value_f))
+#%%
+# This is the accuracy that our model should be able to beat!
+print(f"Prevalence: {prevalence:.2%}")
+#%%
+# Double checking prevalence calculation
+print(collegedf_clean.awards_per_state_value_f.value_counts())
+print(f"Manual calculation: 1020/(1020+2778) = {1020/(1020+2778):.4f}")
+#%%
+# Splitting data for target variable into train and test first
+train, test = train_test_split(
+    collegedf_clean,
+    train_size=2778,
+    stratify=collegedf_clean.awards_per_state_value_f
+)
+#%%
+# Size of each dataset for train and test check
+print(f"Training set shape: {train.shape}")
+print(f"Testing set shape: {test.shape}")
+#%%
+# Splitting data for target variable again for tuning data
+# train_size = .5 means 50% of the data, but an integer represents the number of samples to take for each
+tune, test = train_test_split(
+    test,
+    train_size=.5,
+    stratify=test.awards_per_state_value_f
+)
+#%%
+# Checking size of each dataset for training, testing and tuning
+print(f"Training set shape: {train.shape}")
+print(f"Testing set shape: {test.shape}")
+print(f"Tuning set shape: {tune.shape}")
+
+#%%
+"""
+Step 3: What do your instincts tell you about the data? 
+Can you address your problem, what areas/items are you worried about?
+
+My instincts are telling me that this data will not actually help me learn more about the factors
+that go into SAT scores because there are no clear variables that can indicate higher SAT scores and
+there are too few SAT scores in this dataset to draw any conclusions from.
+"""
