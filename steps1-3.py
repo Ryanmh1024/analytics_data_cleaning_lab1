@@ -100,8 +100,10 @@ collegedf.control.value_counts()
 
 #%%
 collegedf.basic.value_counts()
-# Maybe categorize into specific programs based on Associates, Theological, Masters?
+# Categorize into specific programs based on Associates, Theological, Masters, etc.
 
+#%%
+collegedf.basic.dtype
 #%%
 associate = ['associate']
 master = ["masters"]
@@ -116,7 +118,18 @@ other = ["Associates","Masters","Theological","Bachelors","Art"]
 # If the school falls into that category, then it will be renamed to said school type
 # This is done by checking if it is in the list for that school type
 # If it is not, then it will simply return x, or its original unaltered nanme
-collegedf.basic = collegedf.basic.apply(lambda x: "Associates" if x.lower() in associate else x)
+collegedf.basic = collegedf.basic.apply(lambda x: "Associates" if 'associate' in x.lower() else x)
+collegedf.basic = collegedf.basic.apply(lambda x: "Masters" if 'master' in x.lower() else x)
+collegedf.basic = collegedf.basic.apply(lambda x: "Theological" if 'theological' in x.lower() else x)
+collegedf.basic = collegedf.basic.apply(lambda x: "Baccalaureate" if 'baccalaureate' in x.lower() else x)
+collegedf.basic = collegedf.basic.apply(lambda x: "Art" if 'art' in x.lower() else x)
+collegedf.basic = collegedf.basic.apply(lambda x: "Research" if 'research' in x.lower() else x)
+#%%
+# Special inelegant function set to group all other ungrouped colleges into Other
+collegedf.basic = collegedf.basic.apply(lambda x: "Other" if 'other' in x.lower() else x)
+collegedf.basic = collegedf.basic.apply(lambda x: "Other" if 'schools of' in x.lower() else x)
+collegedf.basic = collegedf.basic.apply(lambda x: "Other" if 'tribal' in x.lower() else x)
+collegedf.basic = collegedf.basic.apply(lambda x: "Other" if 'not applicable' in x.lower() else x)
 
 #%%
 collegedf.basic.value_counts()
